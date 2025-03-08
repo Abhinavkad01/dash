@@ -106,17 +106,35 @@ if "Country" in df.columns:
 # In[6]:
 
 
-# Display regulation description if searched
-def display_regulation_description(search_query):
-    if search_query:
-        search_result = df[df["Regulation Name"].str.contains(search_query, case=False, na=False)]
-        if not search_result.empty:
-            st.write("### Regulation Details")
-            st.markdown(f'<div style="background-color: black; color: white; padding: 10px; border-radius: 5px;">{search_result.iloc[0]["Description"]}</div>', unsafe_allow_html=True)
-        else:
-            st.write("No matching regulation found.")
+# User Input for Searching a Regulation
+search_query = st.text_input("Search for a Regulation")
 
-display_regulation_description(search_query)
+# Filter Data Based on Search Query
+if search_query:
+    filtered_df = df[df["Regulation Name"].str.contains(search_query, case=False, na=False)]
+
+    if not filtered_df.empty:
+        # Display Regulation Description
+        st.subheader("Regulation Description")
+        st.write(filtered_df["Description"].values[0])
+
+        # Display Impact on Cost
+        if "Cost Impact" in filtered_df.columns:
+            st.subheader("Impact on Cost")
+            st.metric(label="Cost Impact", value=f"${filtered_df['Cost Impact'].values[0]:,.2f}")
+
+            # Optional: Add a Horizontal Bar Chart for Visual Representation
+            fig = px.bar(filtered_df, 
+                         x="Cost Impact", 
+                         y="Regulation Name", 
+                         orientation="h",
+                         title="Cost Impact of Selected Regulation",
+                         color="Cost Impact",
+                         color_continuous_scale="reds")
+            st.plotly_chart(fig, use_container_width=True)
+
+    else:
+        st.warning("No regulation found. Try another search term.")
 
 
 # In[7]:
