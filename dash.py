@@ -51,7 +51,8 @@ filtered_df = filtered_df[(filtered_df["Year"] >= selected_year[0]) & (filtered_
 
 
 # Title
-st.title("Regulatory Dashboard")
+# Centered Title
+st.markdown("<h1 style='text-align: center;'>Regulatory Dashboard</h1>", unsafe_allow_html=True)
 
 # Calculate Counts
 count_industry = df["Industry"].nunique()
