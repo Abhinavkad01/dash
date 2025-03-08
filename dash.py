@@ -53,6 +53,24 @@ filtered_df = filtered_df[(filtered_df["Year"] >= selected_year[0]) & (filtered_
 # Title
 st.title("Regulatory Dashboard")
 
+# Calculate Counts
+count_industry = df["Industry"].nunique()
+count_country = df["Country"].nunique()
+count_regulation = df["Regulation Name"].nunique()
+
+# Create a 3-column layout
+col1, col2, col3 = st.columns(3)
+
+# Display Metrics
+with col1:
+    st.metric(label="Count of Industry", value=count_industry)
+
+with col2:
+    st.metric(label="Count of Country", value=count_country)
+
+with col3:
+    st.metric(label="Count of Regulation Name", value=count_regulation)
+
 # Bar Chart - Number of Regulations by Year
 if not filtered_df.empty:
     reg_by_year = filtered_df["Year"].value_counts().reset_index()
