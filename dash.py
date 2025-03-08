@@ -57,20 +57,20 @@ st.markdown("<h1 style='text-align: center;'>Regulatory Dashboard</h1>", unsafe_
 # Calculate Counts
 count_industry = df["Industry"].nunique()
 count_country = df["Country"].nunique()
-count_regulation = df["Regulation Name"].nunique()
+count_regulation = df["Description"].nunique()
 
 # Create a 3-column layout
 col1, col2, col3 = st.columns(3)
 
 # Display Metrics
 with col1:
-    st.metric(label="Count of Industry", value=count_industry)
+    st.metric(label="Number of Industry", value=count_industry)
 
 with col2:
-    st.metric(label="Count of Country", value=count_country)
+    st.metric(label="Number of Country", value=count_country)
 
 with col3:
-    st.metric(label="Count of Regulation Name", value=count_regulation)
+    st.metric(label="Number of Regulations", value=count_Description)
 
 # Bar Chart - Number of Regulations by Year
 if not filtered_df.empty:
