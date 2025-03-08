@@ -70,7 +70,7 @@ with col2:
     st.metric(label="Count of Country", value=count_country)
 
 with col3:
-    st.metric(label="Count of Regulation Name", value=count_Description)
+    st.metric(label="Count of Regulation Name", value=count_regulation)
 
 # Bar Chart - Number of Regulations by Year
 if not filtered_df.empty:
