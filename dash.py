@@ -45,7 +45,7 @@ filtered_df = filtered_df[(filtered_df["Year"] >= selected_year[0]) & (filtered_
 
 # Main Title
 st.markdown("""
-    <h1 style='text-align: center; font-size: 36px; color: #2E3B4E;'>🌍 Global Regulatory Insights Dashboard</h1>
+    <h1 style='text-align: center; font-size: 36px; color: #524585;'>🌍 Global Regulatory Insights Dashboard</h1>
 """, unsafe_allow_html=True)
 
 # Metrics Overview
@@ -70,10 +70,6 @@ if not filtered_df.empty:
     fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
     st.plotly_chart(fig_bar)
     
-# Regulation Type Distribution using Treemap
-if not filtered_df.empty:
-    fig_treemap = px.treemap(filtered_df, path=["Regulation Type", "Country"], values="Year", title="📜 Regulation Type Distribution", template="plotly_dark")
-    st.plotly_chart(fig_treemap)
 
 # Global Regulatory Heatmap
 if "Country" in df.columns:
