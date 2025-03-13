@@ -73,27 +73,49 @@ if not filtered_df.empty:
 import plotly.graph_objects as go
 import plotly.express as px
 
-# Regulation Type Distribution Donut Chart
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+# Load data
+df = pd.read_csv("/mnt/data/REG.csv")
+
+# Check if "Regulation Type" column exists
 if "Regulation Type" in df.columns:
+    # Count occurrences of each regulation type
     reg_counts = df["Regulation Type"].value_counts().reset_index()
     reg_counts.columns = ["Regulation Type", "Count"]
+    
+    # Calculate percentage
+    reg_counts["Percentage"] = (reg_counts["Count"] / reg_counts["Count"].sum()) * 100
 
-    # Create the donut chart
+    # Group small categories under "Others"
+    threshold = 2  # Define percentage threshold
+    reg_counts["Regulation Type"] = reg_counts.apply(
+        lambda x: x["Regulation Type"] if x["Percentage"] >= threshold else "Others", axis=1
+    )
+
+    # Aggregate "Others" category
+    reg_counts = reg_counts.groupby("Regulation Type", as_index=False).sum()
+
+    # Create a clean donut chart
     fig_donut = px.pie(
         reg_counts, 
         names="Regulation Type", 
         values="Count", 
         title="📜 Regulation Type Distribution",
-        hole=0.4,  # Creates the donut effect
-        color_discrete_sequence=px.colors.sequential.Viridis,  # Professional color theme
+        hole=0.4,  # Donut effect
+        color_discrete_sequence=px.colors.sequential.Magma,  # Professional color palette
         template="plotly_dark"
     )
 
-    # Update layout for a polished look
+    # Improve readability
+    fig_donut.update_traces(textinfo="percent+label", pull=[0.05] * len(reg_counts))
+
     fig_donut.update_layout(
         title=dict(
             font=dict(size=22, color="white"),
-            x=0.5  # Centering the title
+            x=0.5
         ),
         showlegend=True,
         legend=dict(
@@ -105,9 +127,6 @@ if "Regulation Type" in df.columns:
 
     # Display in Streamlit
     st.plotly_chart(fig_donut)
-
-
-
 # Global Regulatory Heatmap
 if "Country" in df.columns:
     country_counts = df["Country"].value_counts().reset_index()
