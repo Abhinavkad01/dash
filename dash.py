@@ -10,8 +10,9 @@ df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
 # Rename column to match expected name
 df.rename(columns={"Impact on Cost": "Cost Impact"}, inplace=True)
 
-# Convert "Increase"/"Decrease" to numeric values for visualization
-df["Cost Impact"] = df["Cost Impact"].replace({"Increase": 1, "Decrease": -1})
+# Convert "Cost Impact" to numeric and drop NaN values
+df["Cost Impact"] = pd.to_numeric(df["Cost Impact"], errors="coerce")
+df.dropna(subset=["Cost Impact"], inplace=True)  # Drop NaN values
 
 # Sidebar filters
 st.sidebar.header("Filters")
@@ -65,19 +66,25 @@ if not filtered_df.empty:
 
 # **Corrected Bar Chart - Cost Impact Comparison**
 if not filtered_df.empty:
+    # Ensure "Cost Impact" is numeric
+    filtered_df["Cost Impact"] = pd.to_numeric(filtered_df["Cost Impact"], errors="coerce")
+    filtered_df.dropna(subset=["Cost Impact"], inplace=True)
+
     # Sort and select top 10 for better visualization
     top_regulations = filtered_df.sort_values(by="Cost Impact", ascending=False).head(10)
     
-    fig_comp = px.bar(
-        top_regulations,
-        x="Regulation Name",
-        y="Cost Impact",
-        color="Regulation Name",
-        title="Top 10 Regulations by Cost Impact",
-        labels={"Cost Impact": "Impact on Cost"},
-        color_discrete_sequence=px.colors.qualitative.Set2
-    )
-    st.plotly_chart(fig_comp)
+    if not top_regulations.empty:
+        fig_comp = px.bar(
+            top_regulations,
+            x="Regulation Name",
+            y="Cost Impact",
+            color="Regulation Name",
+            title="Top 10 Regulations by Cost Impact",
+            labels={"Cost Impact": "Impact on Cost ($)"},
+        )
+        st.plotly_chart(fig_comp)
+    else:
+        st.warning("No valid 'Cost Impact' data available for comparison.")
 
 # Pie Chart - Regulation Type Distribution
 if not filtered_df.empty:
@@ -119,9 +126,9 @@ compare_reg1 = st.sidebar.selectbox("Select Regulation 1", df["Regulation Name"]
 compare_reg2 = st.sidebar.selectbox("Select Regulation 2", df["Regulation Name"].dropna().unique())
 
 if compare_reg1 and compare_reg2:
-    compare_df = df[df["Regulation Name"].isin([compare_reg1, compare_reg2])].drop_duplicates()
-
-    if not compare_df.empty and "Cost Impact" in compare_df.columns:
+    compare_df = df[df["Regulation Name"].isin([compare_reg1, compare_reg2])]
+    
+    if "Cost Impact" in compare_df.columns:
         st.subheader("Regulation Comparison")
         st.write(compare_df[["Regulation Name", "Country", "Industry", "Regulation Type", "Year", "Cost Impact"]])
         
@@ -131,12 +138,11 @@ if compare_reg1 and compare_reg2:
             y="Cost Impact",
             color="Regulation Name",
             title="Comparison of Regulation Cost Impact",
-            labels={"Cost Impact": "Impact on Cost"},
-            color_discrete_sequence=["#1f77b4", "#ff7f0e"]
+            labels={"Cost Impact": "Impact on Cost ($)"},
         )
         st.plotly_chart(fig_comp)
     else:
-        st.error("No valid Cost Impact data available for comparison.")
+        st.error("Cost Impact column is missing. Cannot perform comparison.")
 
 # Display Filtered Table
 st.write("### Filtered Data")
