@@ -70,12 +70,8 @@ if not filtered_df.empty:
     fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
     st.plotly_chart(fig_bar)
 
-import plotly.graph_objects as go
-import plotly.express as px
 
-import pandas as pd
-import plotly.express as px
-import streamlit as st
+
 import pandas as pd
 import plotly.express as px
 import dash
