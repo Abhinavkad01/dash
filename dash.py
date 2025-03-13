@@ -7,6 +7,9 @@ file_path = "REG.csv"
 df = pd.read_csv(file_path)
 df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
 
+# Rename column to match expected name
+df.rename(columns={"Impact on Cost": "Cost Impact"}, inplace=True)
+
 # Sidebar filters
 st.sidebar.header("Filters")
 selected_country = st.sidebar.multiselect("Select Country", df["Country"].dropna().unique())
@@ -68,12 +71,11 @@ if not filtered_df.empty:
     fig_pie = px.pie(filtered_df, names="Regulation Type", title="Regulation Type Distribution")
     st.plotly_chart(fig_pie)
 
-# World Map - Regulations by Country
+# World Map - Highlighted Countries with Regulations
 if "Country" in df.columns:
     country_counts = df["Country"].value_counts().reset_index()
     country_counts.columns = ["Country", "Regulation Count"]
     country_counts["Country"] = country_counts["Country"].astype(str)
-    
     fig_map = px.choropleth(
         country_counts, 
         locations="Country", 
@@ -85,20 +87,16 @@ if "Country" in df.columns:
     )
     st.plotly_chart(fig_map)
 
-# User Input for Searching a Regulation
+# Search for a Regulation
 search_query = st.text_input("Search for a Regulation")
 if search_query:
     search_results = df[df["Regulation Name"].str.contains(search_query, case=False, na=False)]
     if not search_results.empty:
         st.subheader("Regulation Description")
         st.write(search_results["Description"].values[0])
-        
         if "Cost Impact" in search_results.columns:
             st.subheader("Impact on Cost")
-            st.metric(label="Cost Impact", value=f"${search_results['Cost Impact'].values[0]:,.2f}")
-            fig = px.bar(search_results, x="Cost Impact", y="Regulation Name", orientation="h", 
-                         title="Cost Impact of Selected Regulation", color="Cost Impact", color_continuous_scale="reds")
-            st.plotly_chart(fig, use_container_width=True)
+            st.metric(label="Cost Impact", value=search_results["Cost Impact"].values[0])
     else:
         st.warning("No regulation found. Try another search term.")
 
@@ -110,17 +108,10 @@ compare_reg2 = st.sidebar.selectbox("Select Regulation 2", df["Regulation Name"]
 if compare_reg1 and compare_reg2:
     compare_df = df[df["Regulation Name"].isin([compare_reg1, compare_reg2])]
     if "Cost Impact" in compare_df.columns:
-        compare_df["Cost Impact"] = pd.to_numeric(compare_df["Cost Impact"], errors="coerce")
-        compare_df = compare_df.dropna(subset=["Cost Impact"])
-        
-        if not compare_df.empty:
-            st.subheader("Regulation Comparison")
-            st.write(compare_df[["Regulation Name", "Country", "Industry", "Regulation Type", "Year", "Cost Impact"]])
-            fig_comp = px.bar(compare_df, x="Regulation Name", y="Cost Impact", color="Regulation Name", 
-                              title="Comparison of Regulation Cost Impact")
-            st.plotly_chart(fig_comp)
-        else:
-            st.warning("No valid data available for comparison.")
+        st.subheader("Regulation Comparison")
+        st.write(compare_df[["Regulation Name", "Country", "Industry", "Regulation Type", "Year", "Cost Impact"]])
+        fig_comp = px.bar(compare_df, x="Regulation Name", y="Cost Impact", color="Regulation Name", title="Comparison of Regulation Cost Impact")
+        st.plotly_chart(fig_comp)
     else:
         st.error("Cost Impact column is missing. Cannot perform comparison.")
 
