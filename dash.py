@@ -76,55 +76,53 @@ import plotly.express as px
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import pandas as pd
+import plotly.express as px
+import dash
+from dash import dcc, html
+  # Update with your actual file path
+
+# Aggregate data for regulation types
+regulation_counts = df["Regulation Type"].value_counts().reset_index()
+regulation_counts.columns = ["Regulation Type", "Count"]
+
+# Create a donut chart
+fig = px.pie(
+    regulation_counts,
+    names="Regulation Type",
+    values="Count",
+    hole=0.4,  # Creates a donut shape
+    title="📜 Regulation Type Distribution",
+    color_discrete_sequence=px.colors.qualitative.Set3
+)
+
+# Center the title
+fig.update_layout(
+    title=dict(
+        text="📜 Regulation Type Distribution",
+        x=0.5,  # Centers the title
+        xanchor="center",
+        font=dict(size=20, family="Arial", color="white")
+    ),
+    legend_title="Regulation Types",
+    paper_bgcolor="black",  # Dark background
+    font=dict(color="white")  # White text for dark theme
+)
+
+# Dash app
+app = dash.Dash(__name__)
+
+app.layout = html.Div(
+    children=[
+        dcc.Graph(figure=fig)
+    ]
+)
+
+if __name__ == "__main__":
+    app.run_server(debug=True)
 
 
-# Check if "Regulation Type" column exists
-if "Regulation Type" in df.columns:
-    # Count occurrences of each regulation type
-    reg_counts = df["Regulation Type"].value_counts().reset_index()
-    reg_counts.columns = ["Regulation Type", "Count"]
-    
-    # Calculate percentage
-    reg_counts["Percentage"] = (reg_counts["Count"] / reg_counts["Count"].sum()) * 100
 
-    # Group small categories under "Others"
-    threshold = 2  # Define percentage threshold
-    reg_counts["Regulation Type"] = reg_counts.apply(
-        lambda x: x["Regulation Type"] if x["Percentage"] >= threshold else "Others", axis=1
-    )
-
-    # Aggregate "Others" category
-    reg_counts = reg_counts.groupby("Regulation Type", as_index=False).sum()
-
-    # Create a clean donut chart
-    fig_donut = px.pie(
-        reg_counts, 
-        names="Regulation Type", 
-        values="Count", 
-        title="📜 Regulation Type Distribution",
-        hole=0.4,  # Donut effect
-        color_discrete_sequence=px.colors.sequential.Magma,  # Professional color palette
-        template="plotly_dark"
-    )
-
-    # Improve readability
-    fig_donut.update_traces(textinfo="percent+label", pull=[0.05] * len(reg_counts))
-
-    fig_donut.update_layout(
-        title=dict(
-            font=dict(size=22, color="white"),
-            x=0.5
-        ),
-        showlegend=True,
-        legend=dict(
-            title="Regulation Types",
-            font=dict(size=12, color="white")
-        ),
-        margin=dict(l=50, r=50, t=100, b=50)
-    )
-
-    # Display in Streamlit
-    st.plotly_chart(fig_donut)
 # Global Regulatory Heatmap
 if "Country" in df.columns:
     country_counts = df["Country"].value_counts().reset_index()
