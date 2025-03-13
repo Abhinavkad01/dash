@@ -9,14 +9,26 @@ df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
 # Rename column to match expected name
 df.rename(columns={"Impact on Cost": "Cost Impact"}, inplace=True)
 
-# Convert "Cost Impact" to numeric (if applicable)
-df["Cost Impact"] = pd.to_numeric(df["Cost Impact"], errors="coerce")
+# Function to standardize "Cost Impact" values
+def convert_cost_impact(value):
+    value = str(value).lower()  # Convert to lowercase and ensure string type
+    if "increase" in value and "decrease" in value:
+        return 0  # Mixed impact
+    elif "increase" in value:
+        return 1  # Positive impact
+    elif "decrease" in value:
+        return -1  # Negative impact
+    else:
+        return 0  # Default to neutral
+
+# Apply transformation
+df["Cost Impact"] = df["Cost Impact"].apply(convert_cost_impact)
 
 # Sidebar filters
 st.sidebar.header("Filters")
 selected_country = st.sidebar.multiselect("Select Country", df["Country"].dropna().unique())
 selected_industry = st.sidebar.multiselect("Select Industry", df["Industry"].dropna().unique())
-selected_year = st.sidebar.slider("Select Year", int(df["Year"].min()), int(df["Year"].max()), 
+selected_year = st.sidebar.slider("Select Year", int(df["Year"].min()), int(df["Year"].max()),
                                   (int(df["Year"].min()), int(df["Year"].max())))
 selected_reg_type = st.sidebar.multiselect("Select Regulation Type", df["Regulation Type"].dropna().unique())
 
@@ -62,7 +74,6 @@ if not filtered_df.empty:
     fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="Trend of Regulations Over Years", markers=True)
     st.plotly_chart(fig_trend)
 
-
 # Pie Chart - Regulation Type Distribution
 if not filtered_df.empty:
     fig_pie = px.pie(filtered_df, names="Regulation Type", title="Regulation Type Distribution")
@@ -97,7 +108,7 @@ if search_query:
     else:
         st.warning("No regulation found. Try another search term.")
 
-# **Regulation Comparison Feature**
+# Regulation Comparison Feature
 st.sidebar.header("Compare Regulations")
 compare_reg1 = st.sidebar.selectbox("Select Regulation 1", df["Regulation Name"].dropna().unique())
 compare_reg2 = st.sidebar.selectbox("Select Regulation 2", df["Regulation Name"].dropna().unique())
@@ -115,7 +126,7 @@ if compare_reg1 and compare_reg2:
             y="Cost Impact",
             color="Regulation Name",
             title="Comparison of Regulation Cost Impact",
-            labels={"Cost Impact": "Impact on Cost ($)"},
+            labels={"Cost Impact": "Impact on Cost"},
         )
         st.plotly_chart(fig_comp)
     else:
