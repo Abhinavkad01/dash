@@ -69,7 +69,41 @@ if not filtered_df.empty:
     country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
     fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
     st.plotly_chart(fig_bar)
-    
+
+import plotly.graph_objects as go
+
+# Regulation Type Distribution
+if "Regulation Type" in df.columns:
+    reg_counts = df["Regulation Type"].value_counts().reset_index()
+    reg_counts.columns = ["Regulation Type", "Count"]
+
+    # Define colors for categories (Modify as needed)
+    colors = ["#4CAF50", "#FFD700", "#808080"]  # Green (Fixed), Yellow (Repairable), Gray (End of Life)
+
+    fig_radial = go.Figure()
+
+    # Add bars to the radial chart
+    fig_radial.add_trace(go.Barpolar(
+        r=reg_counts["Count"],
+        theta=reg_counts["Regulation Type"],
+        width=[10] * len(reg_counts),  # Adjust width if needed
+        marker_color=colors * (len(reg_counts) // 3 + 1),  # Cycle through colors
+        opacity=0.8
+    ))
+
+    # Chart Layout
+    fig_radial.update_layout(
+        polar=dict(
+            radialaxis=dict(visible=True, range=[0, max(reg_counts["Count"]) + 10])
+        ),
+        title="🔄 Regulation Type Distribution",
+        showlegend=False,
+        template="plotly_dark"
+    )
+
+    # Display the chart in Streamlit
+    st.plotly_chart(fig_radial)
+
 
 # Global Regulatory Heatmap
 if "Country" in df.columns:
