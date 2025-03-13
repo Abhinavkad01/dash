@@ -110,9 +110,6 @@ if search_query:
     if not search_results.empty:
         st.subheader("Regulation Description")
         st.write(search_results["Description"].values[0])
-        if "Cost Impact" in search_results.columns:
-            st.subheader("Impact on Cost")
-            st.metric(label="Cost Impact", value=search_results["Cost Impact"].values[0])
     else:
         st.warning("No regulation found. Try another search term.")
 
