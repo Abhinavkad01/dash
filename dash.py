@@ -73,6 +73,13 @@ if not filtered_df.empty:
     trend_data.columns = ["Year", "Regulation Count"]
     fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="Trend of Regulations Over Years", markers=True)
     st.plotly_chart(fig_trend)
+# Bar Chart - Regulations per Country per Year
+if not filtered_df.empty:
+    country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
+    fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="group", 
+                      title="Regulations per Country per Year", labels={"Regulation Count": "Number of Regulations"},
+                      color_discrete_sequence=px.colors.qualitative.Set2)
+    st.plotly_chart(fig_bar
 
 # Pie Chart - Regulation Type Distribution
 if not filtered_df.empty:
