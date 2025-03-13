@@ -79,7 +79,7 @@ if not filtered_df.empty:
     fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", 
                       title="Regulations per Country per Year", labels={"Regulation Count": "Number of Regulations"},
                       color_discrete_sequence=px.colors.qualitative.Set2)
-    fig_bar.update_traces(marker=dict(line=dict(width=0.5)))
+    fig_bar.update_traces(marker=dict(line=dict(width=0.8)))
     st.plotly_chart(fig_bar)
 
 # Pie Chart - Regulation Type Distribution
