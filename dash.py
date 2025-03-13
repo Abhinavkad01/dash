@@ -71,59 +71,41 @@ if not filtered_df.empty:
     st.plotly_chart(fig_bar)
 
 import plotly.graph_objects as go
-import plotly.graph_objects as go
+import plotly.express as px
 
-# Regulation Type Distribution
+# Regulation Type Distribution Donut Chart
 if "Regulation Type" in df.columns:
     reg_counts = df["Regulation Type"].value_counts().reset_index()
     reg_counts.columns = ["Regulation Type", "Count"]
 
-    # Define an upgraded color scheme (More professional shades)
-    colors = ["#2E93fA", "#66DA26", "#E91E63", "#FDD835", "#546E7A"]
-
-    fig_radial = go.Figure()
-
-    # Adding Barpolar Chart
-    fig_radial.add_trace(go.Barpolar(
-        r=reg_counts["Count"],
-        theta=reg_counts["Regulation Type"],
-        width=[12] * len(reg_counts),  # Adjust bar width for better visibility
-        marker_color=colors * (len(reg_counts) // len(colors) + 1),  # Cycle colors dynamically
-        marker_line_color="white",  # Outline bars for better contrast
-        marker_line_width=1.5,
-        opacity=0.9
-    ))
-
-    # Update Layout for a polished look
-    fig_radial.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                showticklabels=True,  # Show radial axis labels
-                ticks="outside",  
-                gridcolor="gray",  # Subtle grid for contrast
-                range=[0, max(reg_counts["Count"]) + 10],  # Auto-scale based on data
-            ),
-            angularaxis=dict(
-                tickmode="array",
-                tickvals=list(range(len(reg_counts))),
-                ticktext=reg_counts["Regulation Type"],  # Custom category labels
-                tickfont=dict(size=12, color="white"),
-                rotation=90  # Rotate labels for readability
-            ),
-        ),
-        title=dict(
-            text="📜 Regulation Type Distribution",
-            font=dict(size=22, color="white"),
-            x=0.5,  # Center title
-            y=0.95
-        ),
-        showlegend=False,
-        template="plotly_dark",
-        margin=dict(l=50, r=50, t=100, b=50),  # Balanced margin for aesthetics
+    # Create the donut chart
+    fig_donut = px.pie(
+        reg_counts, 
+        names="Regulation Type", 
+        values="Count", 
+        title="📜 Regulation Type Distribution",
+        hole=0.4,  # Creates the donut effect
+        color_discrete_sequence=px.colors.sequential.Viridis,  # Professional color theme
+        template="plotly_dark"
     )
 
-    # Display the improved chart in Streamlit
-    st.plotly_chart(fig_radial)
+    # Update layout for a polished look
+    fig_donut.update_layout(
+        title=dict(
+            font=dict(size=22, color="white"),
+            x=0.5  # Centering the title
+        ),
+        showlegend=True,
+        legend=dict(
+            title="Regulation Types",
+            font=dict(size=12, color="white")
+        ),
+        margin=dict(l=50, r=50, t=100, b=50)
+    )
+
+    # Display in Streamlit
+    st.plotly_chart(fig_donut)
+
 
 
 # Global Regulatory Heatmap
