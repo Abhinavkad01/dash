@@ -62,21 +62,6 @@ if not filtered_df.empty:
     fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="Trend of Regulations Over Years", markers=True)
     st.plotly_chart(fig_trend)
 
-# **Corrected Bar Chart - Cost Impact Comparison**
-if not filtered_df.empty:
-    # Sort and select top 10 for better visualization
-    top_regulations = filtered_df.sort_values(by="Cost Impact", ascending=False).head(10)
-    
-    fig_comp = px.bar(
-        top_regulations,
-        x="Regulation Name",
-        y="Cost Impact",
-        color="Cost Impact",
-        color_continuous_scale="RdBu",
-        title="Top 10 Regulations by Cost Impact",
-        labels={"Cost Impact": "Impact on Cost ($)"},
-    )
-    st.plotly_chart(fig_comp)
 
 # Pie Chart - Regulation Type Distribution
 if not filtered_df.empty:
