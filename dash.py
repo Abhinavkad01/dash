@@ -53,12 +53,20 @@ with col2:
 with col3:
     st.metric(label="Number of Regulations", value=count_regulation)
 
-# Bar Chart - Number of Regulations by Year with Trend Line
+# Bar Chart - Number of Regulations by Year
+# 📌 **NEW FEATURE: Trend Analysis - Line Chart**
+if not filtered_df.empty:
+    trend_data = filtered_df.groupby("Year")["Regulation Name"].count().reset_index()
+    trend_data.columns = ["Year", "Regulation Count"]
+
+    fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="Trend of Regulations Over Years", markers=True)
+    st.plotly_chart(fig_trend)
+
+
 if not filtered_df.empty:
     reg_by_year = filtered_df["Year"].value_counts().reset_index()
     reg_by_year.columns = ["Year", "Count"]
-    fig = px.bar(reg_by_year, x="Year", y="Count", title="Number of Regulations by Year", 
-                 color="Count", color_continuous_scale="viridis", trendline="ols")
+    fig = px.bar(reg_by_year, x="Year", y="Count", title="Number of Regulations by Year", color="Count", color_continuous_scale="viridis")
     st.plotly_chart(fig)
 
     # Pie Chart - Regulation Type Distribution
