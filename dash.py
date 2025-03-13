@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -53,16 +50,14 @@ with col2:
 with col3:
     st.metric(label="Number of Regulations", value=count_regulation)
 
-# Bar Chart - Number of Regulations by Year
-# 📌 **NEW FEATURE: Trend Analysis - Line Chart**
+# Trend Analysis - Line Chart
 if not filtered_df.empty:
     trend_data = filtered_df.groupby("Year")["Regulation Name"].count().reset_index()
     trend_data.columns = ["Year", "Regulation Count"]
-
     fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="Trend of Regulations Over Years", markers=True)
     st.plotly_chart(fig_trend)
 
-
+# Bar Chart - Number of Regulations by Year
 if not filtered_df.empty:
     reg_by_year = filtered_df["Year"].value_counts().reset_index()
     reg_by_year.columns = ["Year", "Count"]
@@ -73,14 +68,12 @@ if not filtered_df.empty:
     fig_pie = px.pie(filtered_df, names="Regulation Type", title="Regulation Type Distribution")
     st.plotly_chart(fig_pie)
 
-# World Map - Highlighted Countries with Regulations
+# World Map - Regulations by Country
 if "Country" in df.columns:
     country_counts = df["Country"].value_counts().reset_index()
     country_counts.columns = ["Country", "Regulation Count"]
-    
-    # Ensure country names are valid
     country_counts["Country"] = country_counts["Country"].astype(str)
-
+    
     fig_map = px.choropleth(
         country_counts, 
         locations="Country", 
@@ -94,22 +87,16 @@ if "Country" in df.columns:
 
 # User Input for Searching a Regulation
 search_query = st.text_input("Search for a Regulation")
-
-# Filter Data Based on Search Query
 if search_query:
     search_results = df[df["Regulation Name"].str.contains(search_query, case=False, na=False)]
-    
     if not search_results.empty:
         st.subheader("Regulation Description")
         st.write(search_results["Description"].values[0])
-
-        # Display Impact on Cost if available
+        
         if "Cost Impact" in search_results.columns:
             st.subheader("Impact on Cost")
             st.metric(label="Cost Impact", value=f"${search_results['Cost Impact'].values[0]:,.2f}")
-
-            # Cost Impact Bar Chart
-            fig = px.bar(search_results, x="Cost Impact", y="Regulation Name", orientation="h",
+            fig = px.bar(search_results, x="Cost Impact", y="Regulation Name", orientation="h", 
                          title="Cost Impact of Selected Regulation", color="Cost Impact", color_continuous_scale="reds")
             st.plotly_chart(fig, use_container_width=True)
     else:
@@ -122,21 +109,20 @@ compare_reg2 = st.sidebar.selectbox("Select Regulation 2", df["Regulation Name"]
 
 if compare_reg1 and compare_reg2:
     compare_df = df[df["Regulation Name"].isin([compare_reg1, compare_reg2])]
-    
-    # Ensure required columns exist before selecting
-    required_columns = ["Regulation Name", "Country", "Industry", "Regulation Type", "Year", "Cost Impact"]
-    available_columns = [col for col in required_columns if col in compare_df.columns]
-
-    if available_columns:
-        st.subheader("Regulation Comparison")
-        st.write(compare_df[available_columns])
+    if "Cost Impact" in compare_df.columns:
+        compare_df["Cost Impact"] = pd.to_numeric(compare_df["Cost Impact"], errors="coerce")
+        compare_df = compare_df.dropna(subset=["Cost Impact"])
         
-        # Comparison Bar Chart
-        fig_comp = px.bar(compare_df, x="Regulation Name", y="Cost Impact", color="Regulation Name",
-                          title="Comparison of Regulation Cost Impact")
-        st.plotly_chart(fig_comp)
+        if not compare_df.empty:
+            st.subheader("Regulation Comparison")
+            st.write(compare_df[["Regulation Name", "Country", "Industry", "Regulation Type", "Year", "Cost Impact"]])
+            fig_comp = px.bar(compare_df, x="Regulation Name", y="Cost Impact", color="Regulation Name", 
+                              title="Comparison of Regulation Cost Impact")
+            st.plotly_chart(fig_comp)
+        else:
+            st.warning("No valid data available for comparison.")
     else:
-        st.error("No valid columns found for comparison.")
+        st.error("Cost Impact column is missing. Cannot perform comparison.")
 
 # Display Filtered Table
 st.write("### Filtered Data")
