@@ -69,6 +69,7 @@ if not filtered_df.empty:
     country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
     fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
     st.plotly_chart(fig_bar)
+    
 # Regulation Type Distribution using Treemap
 if not filtered_df.empty:
     fig_treemap = px.treemap(filtered_df, path=["Regulation Type", "Country"], values="Year", title="📜 Regulation Type Distribution", template="plotly_dark")
