@@ -178,4 +178,4 @@ if compare_reg1 and compare_reg2:
 
 # Display Filtered Table
 st.write("### 📊 Filtered Data")
-st.dataframe(filtered_df)"
+st.dataframe(filtered_df)
