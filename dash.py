@@ -63,22 +63,7 @@ if not filtered_df.empty:
     trend_data.columns = ["Year", "Regulation Count"]
     fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="📈 Regulatory Trends Over Years", markers=True, template="plotly_dark")
     st.plotly_chart(fig_trend)
-# Visualization - Industry Regulations Trends (Bar Chart)
-if not filtered_df.empty:
-    industry_trend_data = filtered_df.groupby(["Year", "Industry"])["Regulation Name"].count().reset_index()
-    industry_trend_data.columns = ["Year", "Industry", "Regulation Count"]
 
-    fig_industry_bar = px.bar(
-        industry_trend_data, 
-        x="Year", 
-        y="Regulation Count", 
-        color="Industry", 
-        barmode="group",  # Group bars for better visibility
-        title="🏭 Industry Regulations Over Time", 
-        template="plotly_dark"
-    )
-
-    st.plotly_chart(fig_industry_bar)
 # Regulations per Country per Year
 if not filtered_df.empty:
     country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
