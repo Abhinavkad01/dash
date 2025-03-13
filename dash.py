@@ -71,37 +71,58 @@ if not filtered_df.empty:
     st.plotly_chart(fig_bar)
 
 import plotly.graph_objects as go
+import plotly.graph_objects as go
 
 # Regulation Type Distribution
 if "Regulation Type" in df.columns:
     reg_counts = df["Regulation Type"].value_counts().reset_index()
     reg_counts.columns = ["Regulation Type", "Count"]
 
-    # Define colors for categories (Modify as needed)
-    colors = ["#4CAF50", "#FFD700", "#808080"]  # Green (Fixed), Yellow (Repairable), Gray (End of Life)
+    # Define an upgraded color scheme (More professional shades)
+    colors = ["#2E93fA", "#66DA26", "#E91E63", "#FDD835", "#546E7A"]
 
     fig_radial = go.Figure()
 
-    # Add bars to the radial chart
+    # Adding Barpolar Chart
     fig_radial.add_trace(go.Barpolar(
         r=reg_counts["Count"],
         theta=reg_counts["Regulation Type"],
-        width=[10] * len(reg_counts),  # Adjust width if needed
-        marker_color=colors * (len(reg_counts) // 3 + 1),  # Cycle through colors
-        opacity=0.8
+        width=[12] * len(reg_counts),  # Adjust bar width for better visibility
+        marker_color=colors * (len(reg_counts) // len(colors) + 1),  # Cycle colors dynamically
+        marker_line_color="white",  # Outline bars for better contrast
+        marker_line_width=1.5,
+        opacity=0.9
     ))
 
-    # Chart Layout
+    # Update Layout for a polished look
     fig_radial.update_layout(
         polar=dict(
-            radialaxis=dict(visible=True, range=[0, max(reg_counts["Count"]) + 10])
+            radialaxis=dict(
+                showticklabels=True,  # Show radial axis labels
+                ticks="outside",  
+                gridcolor="gray",  # Subtle grid for contrast
+                range=[0, max(reg_counts["Count"]) + 10],  # Auto-scale based on data
+            ),
+            angularaxis=dict(
+                tickmode="array",
+                tickvals=list(range(len(reg_counts))),
+                ticktext=reg_counts["Regulation Type"],  # Custom category labels
+                tickfont=dict(size=12, color="white"),
+                rotation=90  # Rotate labels for readability
+            ),
         ),
-        title="🔄 Regulation Type Distribution",
+        title=dict(
+            text="📜 Regulation Type Distribution",
+            font=dict(size=22, color="white"),
+            x=0.5,  # Center title
+            y=0.95
+        ),
         showlegend=False,
-        template="plotly_dark"
+        template="plotly_dark",
+        margin=dict(l=50, r=50, t=100, b=50),  # Balanced margin for aesthetics
     )
 
-    # Display the chart in Streamlit
+    # Display the improved chart in Streamlit
     st.plotly_chart(fig_radial)
 
 
