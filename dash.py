@@ -1,21 +1,11 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 
 # Load data
-file_path = "REG.csv"
+file_path = "/mnt/data/REG.csv"
 df = pd.read_csv(file_path)
 df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
-
-
-# In[2]:
-
 
 # Sidebar filters
 st.sidebar.header("Filters")
@@ -24,17 +14,9 @@ selected_industry = st.sidebar.multiselect("Select Industry", df["Industry"].dro
 selected_year = st.sidebar.slider("Select Year", int(df["Year"].min()), int(df["Year"].max()), (int(df["Year"].min()), int(df["Year"].max())))
 selected_reg_type = st.sidebar.multiselect("Select Regulation Type", df["Regulation Type"].dropna().unique())
 
-
-# In[3]:
-
-
 # Search Box for Regulation Name
 st.sidebar.header("Search Regulation")
 search_query = st.sidebar.text_input("Enter Regulation Name")
-
-
-# In[4]:
-
 
 # Filter data
 filtered_df = df.copy()
@@ -46,107 +28,49 @@ if selected_reg_type:
     filtered_df = filtered_df[filtered_df["Regulation Type"].isin(selected_reg_type)]
 filtered_df = filtered_df[(filtered_df["Year"] >= selected_year[0]) & (filtered_df["Year"] <= selected_year[1])]
 
-
-# In[5]:
-
-
 # Title
-# Centered Title
 st.markdown("<h1 style='text-align: center;'>Regulatory Dashboard</h1>", unsafe_allow_html=True)
 
-# Calculate Counts
-count_industry = df["Industry"].nunique()
-count_country = df["Country"].nunique()
-count_regulation = df["Regulation Name"].count()
-
-# Create a 3-column layout
+# Key Metrics
 col1, col2, col3 = st.columns(3)
+col1.metric("Industries", df["Industry"].nunique())
+col2.metric("Countries", df["Country"].nunique())
+col3.metric("Total Regulations", df["Regulation Name"].count())
 
-# Display Metrics
-with col1:
-    st.metric(label="Number of Industry", value=count_industry)
-
-with col2:
-    st.metric(label="Number of Country", value=count_country)
-
-with col3:
-    st.metric(label="Number of Regulations", value=count_regulation)
-
-# Bar Chart - Number of Regulations by Year
+# Line Chart - Trends Over Time
 if not filtered_df.empty:
-    reg_by_year = filtered_df["Year"].value_counts().reset_index()
-    reg_by_year.columns = ["Year", "Count"]
-    fig = px.bar(reg_by_year, x="Year", y="Count", title="Number of Regulations by Year", color="Count", color_continuous_scale="viridis")
-    st.plotly_chart(fig)
+    fig_trend = px.line(filtered_df, x="Year", y="Regulation Name", title="Regulatory Trends Over Time", markers=True)
+    st.plotly_chart(fig_trend)
 
-    # Pie Chart - Regulation Type Distribution
-    fig_pie = px.pie(filtered_df, names="Regulation Type", title="Regulation Type Distribution")
-    st.plotly_chart(fig_pie)
+# Comparison Feature
+st.sidebar.header("Compare Regulations")
+compare_options = st.sidebar.multiselect("Select Regulations to Compare", df["Regulation Name"].dropna().unique(), default=df["Regulation Name"].dropna().unique()[:2])
+if len(compare_options) == 2:
+    comp_df = df[df["Regulation Name"].isin(compare_options)]
+    st.subheader("Regulation Comparison")
+    st.dataframe(comp_df)
 
-# World Map - Highlighted Countries with Regulations
-if "Country" in df.columns:
-    country_counts = df["Country"].value_counts().reset_index()
-    country_counts.columns = ["Country", "Regulation Count"]
-    
-    # Ensure country names are valid
-    country_counts["Country"] = country_counts["Country"].astype(str)
-
-    fig_map = px.choropleth(
-        country_counts, 
-        locations="Country", 
-        locationmode="country names", 
-        color="Regulation Count", 
-        title="Regulations by Country", 
-        color_continuous_scale="plasma",
-        template="plotly_dark"
-    )
-    st.plotly_chart(fig_map)
-
-
-# In[6]:
-
-
-# User Input for Searching a Regulation
-search_query = st.text_input("Search for a Regulation")
-
-# Filter Data Based on Search Query
-if search_query:
-    filtered_df = df[df["Regulation Name"].str.contains(search_query, case=False, na=False)]
-
-    if not filtered_df.empty:
-        # Display Regulation Description
-        st.subheader("Regulation Description")
-        st.write(filtered_df["Description"].values[0])
-
-        # Display Impact on Cost
-        if "Cost Impact" in filtered_df.columns:
-            st.subheader("Impact on Cost")
-            st.metric(label="Cost Impact", value=f"${filtered_df['Cost Impact'].values[0]:,.2f}")
-
-            # Optional: Add a Horizontal Bar Chart for Visual Representation
-            fig = px.bar(filtered_df, 
-                         x="Cost Impact", 
-                         y="Regulation Name", 
-                         orientation="h",
-                         title="Cost Impact of Selected Regulation",
-                         color="Cost Impact",
-                         color_continuous_scale="reds")
-            st.plotly_chart(fig, use_container_width=True)
-
-    else:
-        st.warning("No regulation found. Try another search term.")
-
-
-# In[7]:
-
+# Download Filtered Data
+if not filtered_df.empty:
+    st.download_button(label="Download Filtered Data", data=filtered_df.to_csv(index=False), file_name="filtered_data.csv", mime="text/csv")
 
 # Display Filtered Table
 st.write("### Filtered Data")
 st.dataframe(filtered_df)
 
+# Additional Insights Section
+st.write("### Additional Insights")
+if "Impact Score" in df.columns:
+    avg_impact = df["Impact Score"].mean()
+    st.metric(label="Average Regulatory Impact Score", value=f"{avg_impact:.2f}")
 
-# In[ ]:
+# Industry-Wise Impact
+if "Industry" in df.columns and "Impact Score" in df.columns:
+    impact_by_industry = df.groupby("Industry")["Impact Score"].mean().reset_index()
+    fig_industry = px.bar(impact_by_industry, x="Industry", y="Impact Score", title="Industry-wise Average Impact Score", color="Impact Score", color_continuous_scale="blues")
+    st.plotly_chart(fig_industry)
 
-
-
-
+# Regulation Cost Analysis
+if "Cost Impact" in df.columns:
+    fig_cost = px.histogram(df, x="Cost Impact", title="Distribution of Regulation Costs", nbins=20, color_discrete_sequence=["#EF553B"])
+    st.plotly_chart(fig_cost)
