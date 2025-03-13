@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Load data
 file_path = "REG.csv"
 df = pd.read_csv(file_path)
 df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
@@ -10,9 +9,8 @@ df.columns = df.columns.str.strip()  # Remove leading/trailing spaces
 # Rename column to match expected name
 df.rename(columns={"Impact on Cost": "Cost Impact"}, inplace=True)
 
-# Convert "Cost Impact" to numeric and drop NaN values
+# Convert "Cost Impact" to numeric (if applicable)
 df["Cost Impact"] = pd.to_numeric(df["Cost Impact"], errors="coerce")
-df.dropna(subset=["Cost Impact"], inplace=True)  # Drop NaN values
 
 # Sidebar filters
 st.sidebar.header("Filters")
@@ -66,25 +64,19 @@ if not filtered_df.empty:
 
 # **Corrected Bar Chart - Cost Impact Comparison**
 if not filtered_df.empty:
-    # Ensure "Cost Impact" is numeric
-    filtered_df["Cost Impact"] = pd.to_numeric(filtered_df["Cost Impact"], errors="coerce")
-    filtered_df.dropna(subset=["Cost Impact"], inplace=True)
-
     # Sort and select top 10 for better visualization
     top_regulations = filtered_df.sort_values(by="Cost Impact", ascending=False).head(10)
     
-    if not top_regulations.empty:
-        fig_comp = px.bar(
-            top_regulations,
-            x="Regulation Name",
-            y="Cost Impact",
-            color="Regulation Name",
-            title="Top 10 Regulations by Cost Impact",
-            labels={"Cost Impact": "Impact on Cost ($)"},
-        )
-        st.plotly_chart(fig_comp)
-    else:
-        st.warning("No valid 'Cost Impact' data available for comparison.")
+    fig_comp = px.bar(
+        top_regulations,
+        x="Regulation Name",
+        y="Cost Impact",
+        color="Cost Impact",
+        color_continuous_scale="RdBu",
+        title="Top 10 Regulations by Cost Impact",
+        labels={"Cost Impact": "Impact on Cost ($)"},
+    )
+    st.plotly_chart(fig_comp)
 
 # Pie Chart - Regulation Type Distribution
 if not filtered_df.empty:
