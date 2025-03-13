@@ -74,8 +74,6 @@ if not filtered_df.empty:
 
 import pandas as pd
 import plotly.express as px
-import dash
-from dash import dcc, html
   # Update with your actual file path
 
 # Aggregate data for regulation types
