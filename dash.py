@@ -2,16 +2,15 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 🎯 Set Page Configuration
+# App Configuration
 st.set_page_config(page_title="Global Regulatory Insights", layout="wide")
 
-# 📂 Load Data
-file_path = "REG.csv"  # Ensure the file is in the correct directory
+# Load Data
+file_path = "REG.csv"
 df = pd.read_csv(file_path)
 df.columns = df.columns.str.strip()
 df.rename(columns={"Impact on Cost": "Cost Impact"}, inplace=True)
 
-# 🔄 Convert Cost Impact
 def convert_cost_impact(value):
     value = str(value).lower()
     if "increase" in value and "decrease" in value:
@@ -24,18 +23,17 @@ def convert_cost_impact(value):
 
 df["Cost Impact"] = df["Cost Impact"].apply(convert_cost_impact)
 
-# 🔍 Sidebar - Filters
+# Sidebar - Filters
 st.sidebar.header("🔍 Advanced Filters")
 selected_country = st.sidebar.multiselect("🌍 Select Country", df["Country"].dropna().unique())
 selected_industry = st.sidebar.multiselect("🏭 Select Industry", df["Industry"].dropna().unique())
-selected_year = st.sidebar.slider("📅 Select Year Range", int(df["Year"].min()), int(df["Year"].max()), 
-                                  (int(df["Year"].min()), int(df["Year"].max())))
+selected_year = st.sidebar.slider("📅 Select Year Range", int(df["Year"].min()), int(df["Year"].max()), (int(df["Year"].min()), int(df["Year"].max())))
 selected_reg_type = st.sidebar.multiselect("📜 Select Regulation Type", df["Regulation Type"].dropna().unique())
 
 st.sidebar.header("🔎 Search Regulation")
 search_query = st.sidebar.text_input("Enter Regulation Name")
 
-# 📊 Data Filtering
+# Data Filtering
 filtered_df = df.copy()
 if selected_country:
     filtered_df = filtered_df[filtered_df["Country"].isin(selected_country)]
@@ -45,12 +43,12 @@ if selected_reg_type:
     filtered_df = filtered_df[filtered_df["Regulation Type"].isin(selected_reg_type)]
 filtered_df = filtered_df[(filtered_df["Year"] >= selected_year[0]) & (filtered_df["Year"] <= selected_year[1])]
 
-# 🏆 **Dashboard Title**
+# Main Title
 st.markdown("""
     <h1 style='text-align: center; font-size: 36px; color: #524585;'>🌍 Global Regulatory Insights Dashboard</h1>
 """, unsafe_allow_html=True)
 
-# 📈 Metrics Overview
+# Metrics Overview
 col1, col2, col3 = st.columns(3)
 with col1:
     st.metric(label="🏭 Industries Covered", value=df["Industry"].nunique())
@@ -59,50 +57,81 @@ with col2:
 with col3:
     st.metric(label="📜 Total Regulations", value=df["Regulation Name"].count())
 
-# 📉 **Regulatory Trends Over Years**
+# Visualization - Trends
 if not filtered_df.empty:
     trend_data = filtered_df.groupby("Year")["Regulation Name"].count().reset_index()
     trend_data.columns = ["Year", "Regulation Count"]
-    fig_trend = px.line(trend_data, x="Year", y="Regulation Count", 
-                        title="📈 Regulatory Trends Over Years", markers=True, template="plotly_dark")
+    fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="📈 Regulatory Trends Over Years", markers=True, template="plotly_dark")
     st.plotly_chart(fig_trend)
 
-# 🌍 **Regulations per Country per Year**
+# Regulations per Country per Year
 if not filtered_df.empty:
     country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
-    fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", 
-                     barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
+    fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
     st.plotly_chart(fig_bar)
 
-# 🥯 **Regulation Type Distribution (Donut Chart)**
+
+
+import pandas as pd
+import plotly.express as px
+import dash
+from dash import dcc, html
+  # Update with your actual file path
+
+# Aggregate data for regulation types
 regulation_counts = df["Regulation Type"].value_counts().reset_index()
 regulation_counts.columns = ["Regulation Type", "Count"]
 
-fig_donut = px.pie(
-    regulation_counts,
-    names="Regulation Type",
-    values="Count",
-    hole=0.4,  # Donut shape
-    title="📜 Regulation Type Distribution",
-    color_discrete_sequence=px.colors.qualitative.Set3
-)
+# Create a donut chart
+# Check if "Regulation Type" column exists
+if "Regulation Type" in df.columns:
+    # Count occurrences of each regulation type
+    reg_counts = df["Regulation Type"].value_counts().reset_index()
+    reg_counts.columns = ["Regulation Type", "Count"]
+    
+    # Calculate percentage
+    reg_counts["Percentage"] = (reg_counts["Count"] / reg_counts["Count"].sum()) * 100
 
-# Center title
-fig_donut.update_layout(
-    title=dict(
-        text="📜 Regulation Type Distribution",
-        x=0.5,  # Centers the title
-        xanchor="center",
-        font=dict(size=20, family="Arial", color="white")
-    ),
-    legend_title="Regulation Types",
-    paper_bgcolor="black",  # Dark background
-    font=dict(color="white")  # White text for dark theme
-)
+    # Group small categories under "Others"
+    threshold = 2  # Define percentage threshold
+    reg_counts["Regulation Type"] = reg_counts.apply(
+        lambda x: x["Regulation Type"] if x["Percentage"] >= threshold else "Others", axis=1
+    )
 
-st.plotly_chart(fig_donut)
+    # Aggregate "Others" category
+    reg_counts = reg_counts.groupby("Regulation Type", as_index=False).sum()
 
-# 🌎 **Global Regulatory Heatmap**
+    # Create a clean donut chart
+    fig_donut = px.pie(
+        reg_counts, 
+        names="Regulation Type", 
+        values="Count", 
+        title="📜 Regulation Type Distribution",
+        hole=0.4,  # Donut effect
+        color_discrete_sequence=px.colors.sequential.Magma,  # Professional color palette
+        template="plotly_dark"
+    )
+
+    # Improve readability
+    fig_donut.update_traces(textinfo="percent+label", pull=[0.05] * len(reg_counts))
+
+    fig_donut.update_layout(
+        title=dict(
+            font=dict(size=22, color="white"),
+            x=0.5
+        ),
+        showlegend=True,
+        legend=dict(
+            title="Regulation Types",
+            font=dict(size=12, color="white")
+        ),
+        margin=dict(l=50, r=50, t=100, b=50)
+    )
+
+    # Display in Streamlit
+    st.plotly_chart(fig_donut)
+
+# Global Regulatory Heatmap
 if "Country" in df.columns:
     country_counts = df["Country"].value_counts().reset_index()
     country_counts.columns = ["Country", "Regulation Count"]
@@ -117,7 +146,7 @@ if "Country" in df.columns:
     )
     st.plotly_chart(fig_map)
 
-# 🔍 **Search Feature**
+# Search Feature
 if search_query:
     search_results = df[df["Regulation Name"].str.contains(search_query, case=False, na=False)]
     if not search_results.empty:
@@ -126,7 +155,7 @@ if search_query:
     else:
         st.warning("⚠️ No matching regulations found. Try another search term.")
 
-# ⚖ **Regulation Comparison**
+# Regulation Comparison
 st.sidebar.header("⚖ Compare Regulations")
 compare_reg1 = st.sidebar.selectbox("📌 Select Regulation 1", df["Regulation Name"].dropna().unique())
 compare_reg2 = st.sidebar.selectbox("📌 Select Regulation 2", df["Regulation Name"].dropna().unique())
@@ -149,6 +178,6 @@ if compare_reg1 and compare_reg2:
     else:
         st.error("⚠️ Cost Impact column is missing. Cannot perform comparison.")
 
-# 📋 **Display Filtered Table**
+# Display Filtered Table
 st.write("### 📊 Filtered Data")
-st.dataframe(filtered_df)
+st.dataframe(filtered_df)"
