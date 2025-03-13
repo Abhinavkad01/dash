@@ -77,8 +77,6 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-# Load data
-df = pd.read_csv("REG.csv")
 
 # Check if "Regulation Type" column exists
 if "Regulation Type" in df.columns:
