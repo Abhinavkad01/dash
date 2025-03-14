@@ -48,7 +48,7 @@ if selected_country:
 if selected_industry:
     filtered_df = filtered_df[filtered_df["Industry"].isin(selected_industry)]
 if selected_reg_type:
-    filtered_df = filtered_df[filtered_df["Regulation Type"].isin(selected_reg_type)]
+    filtered_df = filtered_df[filtered_df["Regulation Category"].isin(selected_reg_type)]
 if selected_reg_cat:
     filtered_df = filtered_df[filtered_df["Regulation Category"].isin(selected_reg_cat)]
 filtered_df = filtered_df[(filtered_df["Year"] >= selected_year[0]) & (filtered_df["Year"] <= selected_year[1])]
