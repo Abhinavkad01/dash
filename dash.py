@@ -36,7 +36,7 @@ selected_country = st.sidebar.multiselect("🌍 Select Country", df["Country"].d
 selected_industry = st.sidebar.multiselect("🏭 Select Industry", df["Industry"].dropna().unique())
 selected_year = st.sidebar.slider("📅 Select Year Range", int(df["Year"].min()), int(df["Year"].max()), (int(df["Year"].min()), int(df["Year"].max())))
 selected_reg_type = st.sidebar.multiselect("📜 Select Regulation Type", df["Regulation Type"].dropna().unique())
-selected_reg_cat = st.sidebar.multiselect("📜 Select Regulation Category", df["Regulation Category"].dropna().unique())
+selected_reg_cat = st.sidebar.multiselect("Select Regulation Category", df["Regulation Category"].dropna().unique())
 
 st.sidebar.header("🔎 Search Regulation")
 search_query = st.sidebar.text_input("Enter Regulation Name")
@@ -86,8 +86,6 @@ if not filtered_df.empty and "Regulation Category" in df.columns:
     category_counts.columns = ["Regulation Category", "Count"]
     fig_category_bar = px.bar(category_counts, x="Regulation Category", y="Count", color="Regulation Category", title="📊 Number of Regulations per Category", template="plotly_dark")
     st.plotly_chart(fig_category_bar)
-else:
-    st.warning("⚠️ No data available for selected filters. Try adjusting your selections.")
 
 # Regulation Type Distribution (Donut Chart)
 if "Regulation Type" in df.columns:
