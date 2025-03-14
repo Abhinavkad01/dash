@@ -35,7 +35,7 @@ st.sidebar.header("🔍 Advanced Filters")
 selected_country = st.sidebar.multiselect("🌍 Select Country", df["Country"].dropna().unique())
 selected_industry = st.sidebar.multiselect("🏭 Select Industry", df["Industry"].dropna().unique())
 selected_year = st.sidebar.slider("📅 Select Year Range", int(df["Year"].min()), int(df["Year"].max()), (int(df["Year"].min()), int(df["Year"].max())))
-selected_reg_type = st.sidebar.multiselect("📜 Select Regulation Type", df["Regulation Type"].dropna().unique())
+selected_reg_type = st.sidebar.multiselect("📜 Select Regulation Type", df["Regulation Category"].dropna().unique())
 selected_reg_cat = st.sidebar.multiselect("Select Regulation Category", df["Regulation Category"].dropna().unique())
 
 st.sidebar.header("🔎 Search Regulation")
