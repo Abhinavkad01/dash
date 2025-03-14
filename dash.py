@@ -74,11 +74,7 @@ if not filtered_df.empty and "Year" in df.columns:
     fig_trend = px.line(trend_data, x="Year", y="Regulation Count", title="📈 Regulatory Trends Over Years", markers=True, template="plotly_dark")
     st.plotly_chart(fig_trend)
 
-# Regulations per Country per Year
-if not filtered_df.empty and "Country" in df.columns:
-    country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
-    fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
-    st.plotly_chart(fig_bar)
+
 
 # Regulations per Category
 if not filtered_df.empty and "Regulation Category" in df.columns:
@@ -86,6 +82,12 @@ if not filtered_df.empty and "Regulation Category" in df.columns:
     category_counts.columns = ["Regulation Category", "Count"]
     fig_category_bar = px.bar(category_counts, x="Regulation Category", y="Count", color="Regulation Category", title="📊 Number of Regulations per Category", template="plotly_dark")
     st.plotly_chart(fig_category_bar)
+
+# Regulations per Country per Year
+if not filtered_df.empty and "Country" in df.columns:
+    country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
+    fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
+    st.plotly_chart(fig_bar)
 
 # Regulation Type Distribution (Donut Chart)
 if "Regulation Type" in df.columns:
