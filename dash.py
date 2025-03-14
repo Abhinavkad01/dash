@@ -195,3 +195,29 @@ if compare_reg1 and compare_reg2:
 # Display Filtered Table
 st.write("### 📊 Filtered Data")
 st.dataframe(filtered_df)
+# Regulation Comparison
+st.sidebar.header("⚖ Compare Regulations")
+compare_reg1 = st.sidebar.selectbox("📌 Select Regulation 1", df["Regulation Name"].dropna().unique())
+compare_reg2 = st.sidebar.selectbox("📌 Select Regulation 2", df["Regulation Name"].dropna().unique())
+
+if compare_reg1 and compare_reg2:
+    compare_df = df[df["Regulation Name"].isin([compare_reg1, compare_reg2])]
+    if "Cost Impact" in compare_df.columns:
+        st.subheader("⚖ Regulation Comparison")
+        st.write(compare_df[["Regulation Name", "Country", "Industry", "Regulation Type", "Year", "Cost Impact"]])
+        fig_comp = px.bar(
+            compare_df,
+            x="Regulation Name",
+            y="Cost Impact",
+            color="Regulation Name",
+            title="💰 Comparison of Regulation Cost Impact",
+            labels={"Cost Impact": "Impact on Cost"},
+            template="plotly_dark"
+        )
+        st.plotly_chart(fig_comp)
+    else:
+        st.error("⚠️ Cost Impact column is missing. Cannot perform comparison.")
+
+# Display Filtered Table
+st.write("### 📊 Filtered Data")
+st.dataframe(filtered_df)
