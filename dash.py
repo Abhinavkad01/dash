@@ -29,6 +29,7 @@ selected_country = st.sidebar.multiselect("🌍 Select Country", df["Country"].d
 selected_industry = st.sidebar.multiselect("🏭 Select Industry", df["Industry"].dropna().unique())
 selected_year = st.sidebar.slider("📅 Select Year Range", int(df["Year"].min()), int(df["Year"].max()), (int(df["Year"].min()), int(df["Year"].max())))
 selected_reg_type = st.sidebar.multiselect("📜 Select Regulation Type", df["Regulation Type"].dropna().unique())
+selected_reg_type = st.sidebar.multiselect("📜 Select Regulation Type", df["Regulation Category"].dropna().unique())
 
 st.sidebar.header("🔎 Search Regulation")
 search_query = st.sidebar.text_input("Enter Regulation Name")
@@ -69,7 +70,22 @@ if not filtered_df.empty:
     country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
     fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
     st.plotly_chart(fig_bar)
+# Count the number of regulations per category
+    category_counts = df["Regulation Category"].value_counts().reset_index()
+    category_counts.columns = ["Regulation Category", "Count"]
 
+# Create a bar chart
+    fig_bar = px.bar(
+    category_counts, 
+    x="Regulation Category", 
+    y="Count", 
+    color="Regulation Category", 
+    title="📊 Number of Regulations per Category",
+    template="plotly_dark"
+)
+
+# Show the figure
+   fig_bar.show()
 
 
 import pandas as pd
