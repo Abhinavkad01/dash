@@ -70,22 +70,26 @@ if not filtered_df.empty:
     country_year_data = filtered_df.groupby(["Year", "Country"]).size().reset_index(name="Regulation Count")
     fig_bar = px.bar(country_year_data, x="Year", y="Regulation Count", color="Country", barmode="stack", title="🌍 Regulations per Country per Year", template="plotly_dark")
     st.plotly_chart(fig_bar)
-# Count the number of regulations per category
-    category_counts = df["Regulation Category"].value_counts().reset_index()
+    
+# Regulations per Category
+if not filtered_df.empty and "Regulation Category" in filtered_df.columns:
+    category_counts = filtered_df["Regulation Category"].value_counts().reset_index()
     category_counts.columns = ["Regulation Category", "Count"]
+    
+    # Create a bar chart
+    fig_category_bar = px.bar(
+        category_counts, 
+        x="Regulation Category", 
+        y="Count", 
+        color="Regulation Category", 
+        title="📊 Number of Regulations per Category",
+        template="plotly_dark"
+    )
 
-# Create a bar chart
-    fig_bar = px.bar(
-    category_counts, 
-    x="Regulation Category", 
-    y="Count", 
-    color="Regulation Category", 
-    title="📊 Number of Regulations per Category",
-    template="plotly_dark"
-)
-
-# Show the figure
-   fig_bar.show()
+    # Show the figure in Streamlit
+    st.plotly_chart(fig_category_bar)
+else:
+    st.warning("⚠️ No data available for selected filters. Try adjusting your selections.")
 
 
 import pandas as pd
